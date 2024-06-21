@@ -16,7 +16,7 @@ int getRadar(){
   int i = 0;
   while(Serial2.available()){
     if (Serial2.read()==0xAA && Serial2.read()==0xFF) {
-      Serial.println("Radar: ");
+      Serial.print("Radar: ");
       for (i = 0; i < 28; i++) {
         Serial.print(Serial2.read(), HEX);
         Serial.print(" ");
