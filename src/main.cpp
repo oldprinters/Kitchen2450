@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Timer.h"
 
-Timer tRadar(1000);
+Timer tRadar(100);
 
 //------------------------------------------------------------------------------------------------------------
 void setup() {
@@ -12,17 +12,76 @@ void setup() {
   delay(500);
 }
 //------------------------------------------------------------------------------------------------------------
+void outByte(uint8_t n){
+  if(n < 10)
+    Serial.print("0");
+  Serial.print(n, HEX);
+}
+//------------------------------------------------------------------------------------------------------------
+void outHexArray(uint8_t *byteArray, int size = 26){
+  for (int i = 0; i < size; i++) {
+    outByte(byteArray[i]);
+    if(i % 2 > 0)
+      Serial.print(" ");
+  }
+  Serial.println();
+}
+//------------------------------------------------------------------------------------------------------------
+void outObject(uint8_t* byteArray, int &i ){
+  bool sign{0};
+  int16_t x1 = (byteArray[i++] + 256 * byteArray[i++]);
+  if (x1 && 0x8000){
+    sign  =  1;
+    x1 &= 0x7fff;
+  }
+  // Serial.print("x = ");
+  // Serial.print(sign?"-":" ");
+  // Serial.print(x1);
+  int y1 = (byteArray[i++] + 256 * byteArray[i++]);
+  if (y1 && 0x8000){
+    sign  =  1;
+    y1 &= 0x7fff;
+  } else sign = 0;
+    // Serial.print("\ty = ");
+    // Serial.print(sign?"-":" ");
+    // Serial.print(y1);
+  int s1 = byteArray[i++] + 256 * byteArray[i++];
+  if (s1 && 0x8000){
+    sign  =  1;
+    s1 &= 0x7fff;
+  } else sign = 0;
+    // Serial.print("\ts = ");
+    // Serial.print(sign?"-":" ");
+    // Serial.print(s1);
+  int d1 = byteArray[i++] + 256 * byteArray[i++];
+  if(d1 != 360 && d1 != 0){
+    Serial.print("\td = ");
+    Serial.print(d1);
+  }
+  int l = sqrt(pow(x1,2) + pow(y1,2));
+  Serial.print(" l = ");
+  Serial.print(l);
+  Serial.print(";\t");
+}
+//------------------------------------------------------------------------------------------------------------
 int getRadar(){
   int i = 0;
   while(Serial2.available()){
     if (Serial2.read()==0xAA && Serial2.read()==0xFF) {
-      Serial.print("Radar: ");
-      for (i = 0; i < 28; i++) {
-        Serial.print(Serial2.read(), HEX);
-        Serial.print(" ");
-      }
+      // Serial.print("Radar: ");
+      uint8_t byteArray[28];
+      int nBytes = Serial2.readBytes(byteArray,28);
+      // Serial.print(nBytes);
+      // Serial.print(": ");
+      int16_t* intArray = reinterpret_cast<int16_t*>(byteArray+2);
+      // outHexArray(byteArray+2, 24);
+      // outHexArray(byteArray, 28);
+      i = 2;
+      outObject(byteArray,  i);
+      outObject(byteArray,  i);
+      outObject(byteArray,  i);
       Serial.println();
-      }
+    }
   }
   return i;
 }
