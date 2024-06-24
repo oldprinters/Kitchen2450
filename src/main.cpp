@@ -3,6 +3,27 @@
 
 Timer tRadar(100);
 
+const uint8_t ledR{27};
+const uint8_t ledG{26};
+const uint8_t ledB{25};
+
+
+//------------------------------------------------------------------------------------------------------------
+void testLeds()  {
+  digitalWrite(ledR, HIGH);
+  digitalWrite(ledG, LOW);
+  digitalWrite(ledB, LOW);
+  delay(500);
+  digitalWrite(ledR, LOW);
+  digitalWrite(ledG, HIGH);
+  digitalWrite(ledB, LOW);
+  delay(500);
+  digitalWrite(ledR, LOW);
+  digitalWrite(ledG, LOW);
+  digitalWrite(ledB, HIGH);
+  delay(500);
+  digitalWrite(ledB, LOW);
+}
 //------------------------------------------------------------------------------------------------------------
 void setup() {
   Serial.begin(115200); //Feedback over Serial Monitor
@@ -10,6 +31,10 @@ void setup() {
   delay(500);
   Serial2.begin (256000, SERIAL_8N1, 16, 17); //UART for monitoring the radar
   delay(500);
+  pinMode(ledR, OUTPUT);
+  pinMode(ledG, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  testLeds();
 }
 //------------------------------------------------------------------------------------------------------------
 void outByte(uint8_t n){
@@ -27,7 +52,7 @@ void outHexArray(uint8_t *byteArray, int size = 26){
   Serial.println();
 }
 //------------------------------------------------------------------------------------------------------------
-void outObject(uint8_t* byteArray, int &i ){
+int16_t outObject(uint8_t* byteArray, int &i ){
   bool sign{0};
   int16_t x1 = (byteArray[i++] + 256 * byteArray[i++]);
   if (x1 && 0x8000){
@@ -62,6 +87,7 @@ void outObject(uint8_t* byteArray, int &i ){
   Serial.print(" l = ");
   Serial.print(l);
   Serial.print(";\t");
+  return l;
 }
 //------------------------------------------------------------------------------------------------------------
 int getRadar(){
@@ -77,9 +103,15 @@ int getRadar(){
       // outHexArray(byteArray+2, 24);
       // outHexArray(byteArray, 28);
       i = 2;
-      outObject(byteArray,  i);
-      outObject(byteArray,  i);
-      outObject(byteArray,  i);
+      int16_t l1 = outObject(byteArray,  i);
+      int16_t l2 = outObject(byteArray,  i);
+      int16_t l3 = outObject(byteArray,  i);
+      if(l1 > 0)digitalWrite(ledR, HIGH);
+      else digitalWrite(ledR, LOW);
+      if(l2 > 0)digitalWrite(ledG, HIGH);
+      else digitalWrite(ledG, LOW);
+      if(l3 > 0)digitalWrite(ledB, HIGH);
+      else digitalWrite(ledB, LOW);
       Serial.println();
     }
   }
