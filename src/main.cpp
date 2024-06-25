@@ -52,7 +52,7 @@ void outHexArray(uint8_t *byteArray, int size = 26){
   Serial.println();
 }
 //------------------------------------------------------------------------------------------------------------
-int16_t outObject(uint8_t* byteArray, int &i ){
+int16_t outObject(uint8_t* byteArray, int &i, bool outOn = true ){
   bool sign{0};
   int16_t x1 = (byteArray[i++] + 256 * byteArray[i++]);
   if (x1 && 0x8000){
@@ -79,14 +79,16 @@ int16_t outObject(uint8_t* byteArray, int &i ){
     // Serial.print(sign?"-":" ");
     // Serial.print(s1);
   int d1 = byteArray[i++] + 256 * byteArray[i++];
-  if(d1 != 360 && d1 != 0){
+  if(d1 != 360 && d1 != 0 && outOn){
     Serial.print("\td = ");
     Serial.print(d1);
   }
   int l = sqrt(pow(x1,2) + pow(y1,2));
-  Serial.print(" l = ");
-  Serial.print(l);
-  Serial.print(";\t");
+  if(outOn){
+    Serial.print(" l = ");
+    Serial.print(l);
+    Serial.print(";\t");
+  }
   return l;
 }
 //------------------------------------------------------------------------------------------------------------
@@ -103,9 +105,9 @@ int getRadar(){
       // outHexArray(byteArray+2, 24);
       // outHexArray(byteArray, 28);
       i = 2;
-      int16_t l1 = outObject(byteArray,  i);
-      int16_t l2 = outObject(byteArray,  i);
-      int16_t l3 = outObject(byteArray,  i);
+      int16_t l1 = outObject(byteArray,  i, false);
+      int16_t l2 = outObject(byteArray,  i, false);
+      int16_t l3 = outObject(byteArray,  i, false);
       if(l1 > 0)digitalWrite(ledR, HIGH);
       else digitalWrite(ledR, LOW);
       if(l2 > 0)digitalWrite(ledG, HIGH);
