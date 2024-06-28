@@ -17,6 +17,8 @@ void Alarm::cycle(){
             ledStat = !ledStat?1: 0;
             digitalWrite(pin, ledStat);
         }
+    } else  {
+        digitalWrite(pin, LOW);
     }
 }
 //---------------------------------------------------------
