@@ -1,12 +1,15 @@
 #include <Arduino.h>
 #include "Timer.h"
+#include "alarm.h"
 
 Timer tRadar(100);
 
 const uint8_t ledR{27};
 const uint8_t ledG{26};
 const uint8_t ledB{25};
-
+Alarm ledAlR(ledR);
+Alarm ledAlG(ledG);
+Alarm ledAlB(ledB);
 
 //------------------------------------------------------------------------------------------------------------
 void testLeds()  {
@@ -31,10 +34,10 @@ void setup() {
   delay(500);
   Serial2.begin (256000, SERIAL_8N1, 16, 17); //UART for monitoring the radar
   delay(500);
-  pinMode(ledR, OUTPUT);
-  pinMode(ledG, OUTPUT);
-  pinMode(ledB, OUTPUT);
-  testLeds();
+  // pinMode(ledR, OUTPUT);
+  // pinMode(ledG, OUTPUT);
+  // pinMode(ledB, OUTPUT);
+  // testLeds();
 }
 //------------------------------------------------------------------------------------------------------------
 void outByte(uint8_t n){
@@ -108,12 +111,15 @@ int getRadar(){
       int16_t l1 = outObject(byteArray,  i, false);
       int16_t l2 = outObject(byteArray,  i, false);
       int16_t l3 = outObject(byteArray,  i, false);
-      if(l1 > 0)digitalWrite(ledR, HIGH);
-      else digitalWrite(ledR, LOW);
-      if(l2 > 0)digitalWrite(ledG, HIGH);
-      else digitalWrite(ledG, LOW);
-      if(l3 > 0)digitalWrite(ledB, HIGH);
-      else digitalWrite(ledB, LOW);
+      ledAlR.setDuration(l1);
+      ledAlG.setDuration(l2);
+      ledAlB.setDuration(l3);
+      // if(l1 > 0)digitalWrite(ledR, HIGH);
+      // else digitalWrite(ledR, LOW);
+      // if(l2 > 0)digitalWrite(ledG, HIGH);
+      // else digitalWrite(ledG, LOW);
+      // if(l3 > 0)digitalWrite(ledB, HIGH);
+      // else digitalWrite(ledB, LOW);
       Serial.println();
     }
   }
@@ -125,5 +131,8 @@ void loop() {
     tRadar.setTimer();
     getRadar();
   }
+  ledAlR.cycle();
+  ledAlG.cycle();
+  ledAlB.cycle();
   // put your main code here, to run repeatedly:
 }
